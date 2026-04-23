@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lead Funnel · PE & AP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f1ed;color:#1a1a18;min-height:100vh;font-size:13px}
+.nav{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e4e2da;display:flex;align-items:center;padding:0 1.5rem;height:54px;gap:.75rem}
+.nav-brand{font-size:14px;font-weight:700;color:#1a1a18;white-space:nowrap;letter-spacing:-.3px}
+.nav-brand span{opacity:.35;margin:0 4px}
+.sec-tabs{display:flex;gap:2px}
+.sec-tab{padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;border:none;background:transparent;color:#666;transition:.15s}
+.sec-tab:hover{background:#f2f1ed}
+.sec-tab.on{background:#f2f1ed;color:#1a1a18;font-weight:600}
+.prod-tabs{margin-left:auto;display:flex;gap:6px}
+.prod-tab{padding:4px 14px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;border:1.5px solid #e4e2da;background:transparent;color:#888;transition:.15s}
+.prod-tab.pe.on{background:#185FA5;color:#fff;border-color:#185FA5}
+.prod-tab.ap.on{background:#854F0B;color:#fff;border-color:#854F0B}
+.main{max-width:1100px;margin:0 auto;padding:1.75rem 1.5rem}
+.sec{display:none}.sec.on{display:block}
+.card{background:#fff;border:1px solid #e4e2da;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#999}
+.mg4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.mg5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1rem}
+.mg6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:1rem}
+.mg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.mc{background:#f7f6f2;border-radius:8px;padding:10px 12px}
+.mc-l{font-size:10px;color:#999;margin-bottom:2px}
+.mc-v{font-size:19px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
+.mc-s{font-size:10px;color:#aaa;margin-top:2px}
+.funnel{display:flex;flex-direction:column;gap:1px}
+.fstage{display:grid;grid-template-columns:90px 1fr 72px 100px;align-items:center;gap:8px;padding:7px 0}
+.flabel{font-size:11px;color:#666}
+.fbar-bg{height:7px;background:#f0efe8;border-radius:4px;overflow:hidden}
+.fbar{height:100%;border-radius:4px;transition:width .6s ease}
+.fcount{font-size:14px;font-weight:700;text-align:right;letter-spacing:-.3px}
+.fcpl{font-size:10px;color:#999;text-align:right}
+.farrow{font-size:10px;color:#ccc;padding:0 0 2px 98px}
+table{width:100%;border-collapse:collapse}
+th{padding:7px 8px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aaa;border-bottom:1px solid #e4e2da;text-align:left;white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid #f5f4f0;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fdfcfb}
+td.r{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+td.d{color:#999;font-size:11px;text-align:right}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700}
+.b-ok{background:#e8f5e0;color:#3a6b10}
+.b-warn{background:#fef3e2;color:#8a5210}
+.b-bad{background:#fde8e8;color:#9b2929}
+.b-neutral{background:#f0efe8;color:#666}
+.b-2025{background:#ede9fe;color:#4c1d95}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.flb{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.04em}
+input[type=number],input[type=text],input[type=month],select{padding:7px 9px;border:1px solid #dddbd3;border-radius:7px;font-size:13px;background:#fff;width:100%;color:#1a1a18;transition:.15s}
+input:focus,select:focus{outline:none;border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.btn{padding:7px 16px;font-size:12px;border-radius:7px;cursor:pointer;border:1px solid #dddbd3;background:#fff;color:#1a1a18;font-weight:500;transition:.15s;white-space:nowrap}
+.btn:hover{background:#f5f4f0}
+.btn-dark{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.btn-dark:hover{background:#2a2a28}
+.btn-sm{padding:3px 9px;font-size:11px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;width:100%;max-width:660px;max-height:93vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:1.25rem}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f0efe8}
+.msec{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.09em;text-transform:uppercase;margin:1.25rem 0 .75rem;padding-bottom:6px;border-bottom:1px solid #f0efe8}
+.tgl-row{display:flex;gap:4px;background:#f7f6f2;padding:3px;border-radius:8px;max-width:380px;margin-bottom:1rem}
+.tgl{flex:1;padding:6px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;border:none;background:transparent;color:#999;transition:.15s;text-align:center}
+.tgl.on{background:#fff;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rate-box{background:#f7f6f2;border-radius:8px;padding:9px 11px;margin-bottom:6px}
+.rate-box.highlighted{background:#ede9fe;border:1.5px solid #a78bfa}
+.rb-l{font-size:10px;color:#999;margin-bottom:1px}
+.rb-v{font-size:14px;font-weight:700;color:#1a1a18;border:none;background:transparent;width:100%;padding:0}
+.cgrid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.cgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.chart-wrap{position:relative;height:190px}
+.prog{height:5px;background:#f0efe8;border-radius:3px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:3px}
+.divider{border:none;border-top:1px solid #f0efe8;margin:1rem 0}
+.incomplete{font-size:10px;color:#ccc;font-style:italic}
+.sub-tabs{display:flex;gap:5px;margin-bottom:1rem}
+.sub-tab{padding:4px 12px;font-size:11px;font-weight:500;border-radius:6px;cursor:pointer;border:1px solid #e4e2da;background:transparent;color:#666;transition:.15s}
+.sub-tab.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.tip{display:inline-block;background:#e6f1fb;color:#0c447c;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:3px;vertical-align:middle}
+.tip-2025{display:inline-block;background:#ede9fe;color:#4c1d95;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:3px;vertical-align:middle}
+.warn-box{background:#fef3e2;border-radius:7px;padding:7px 10px;font-size:11px;color:#8a5210;margin-bottom:8px}
+.info-box{background:#ede9fe;border-radius:7px;padding:7px 10px;font-size:11px;color:#4c1d95;margin-bottom:8px;line-height:1.5}
+.range-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:6px 0 2px}
+.r-low{background:#52a534;flex:1}
+.r-mid{background:#e89520;flex:1}
+.r-high{background:#c93535;flex:1}
+.needle-dot{width:8px;height:8px;border-radius:50%;background:#1a1a18;position:absolute;top:-9px;transform:translateX(-50%)}
+.seas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:1rem}
+.seas-month{background:#f7f6f2;border-radius:8px;padding:8px 6px;text-align:center;border:1.5px solid transparent}
+.seas-month.current{border-color:#185FA5}
+.seas-mn{font-size:10px;font-weight:700;color:#666;margin-bottom:4px}
+.seas-idx{font-size:13px;font-weight:700}
+.seas-bar{height:4px;border-radius:2px;margin:4px 0 2px;background:#e4e2da}
+.seas-bar-fill{height:100%;border-radius:2px}
+.seas-lbl{font-size:9px;color:#aaa}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">Lead Funnel<span>/</span>Dashboard</div>
+  <div class="sec-tabs">
+    <button class="sec-tab on" onclick="goSec('dashboard')">Resumen</button>
+    <button class="sec-tab" onclick="goSec('historial')">Historial</button>
+    <button class="sec-tab" onclick="goSec('planeador')">Planeador</button>
+    <button class="sec-tab" onclick="goSec('tendencias')">Tendencias</button>
+    <button class="sec-tab" onclick="goSec('estacionalidad')">Estacionalidad</button>
+  </div>
+  <div class="prod-tabs">
+    <button class="prod-tab pe on" id="btn-pe" onclick="setProd('pe')">Pago Express</button>
+    <button class="prod-tab ap" id="btn-ap" onclick="setProd('ap')">Aquí Pago</button>
+  </div>
+</nav>
+<div class="main">
+  <div class="sec on" id="sec-dashboard"><div id="dash-content"></div></div>
+  <div class="sec" id="sec-historial">
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">Historial de resultados</div><div style="font-size:11px;color:#aaa;margin-top:3px">Actualizar al cierre de cada mes</div></div>
+        <button class="btn btn-dark" onclick="openModal()">+ Agregar mes</button>
+      </div>
+      <div id="hist-sub-tabs" class="sub-tabs"></div>
+      <div id="hist-content"></div>
+    </div>
+  </div>
+  <div class="sec" id="sec-planeador">
+    <div id="plan-sub-tabs" class="sub-tabs"></div>
+    <div id="plan-content"></div>
+  </div>
+  <div class="sec" id="sec-tendencias"><div id="tend-content"></div></div>
+  <div class="sec" id="sec-estacionalidad"><div id="seas-content"></div></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Agregar mes</div>
+    <div id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-dark" onclick="saveMonth()">Guardar</button>
+    </div>
+  </div>
+</div>
+<script>
+const SK='lfunnel_v4';
+const PC={pe:'#185FA5',ap:'#854F0B'};
+const PL={pe:'#e6f1fb',ap:'#faeeda'};
+const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const SEAS={1:.75,2:.82,3:.88,4:.90,5:.92,6:.95,7:1.02,8:.98,9:1.05,10:1.12,11:1.45,12:1.55};
+const SEAS_LBL={1:'Muy barato',2:'Barato',3:'Barato',4:'Normal',5:'Normal',6:'Normal',7:'Moderado',8:'Normal',9:'Moderado',10:'Caro',11:'Muy caro',12:'Muy caro'};
+const SEAS_CLR={1:'#52a534',2:'#52a534',3:'#6ab840',4:'#8fbe55',5:'#8fbe55',6:'#a3c96b',7:'#e89520',8:'#a3c96b',9:'#e89520',10:'#c97020',11:'#c93535',12:'#9b2929'};
+
+// ── Tasas de conversión (boca rate) fijas · resultados anuales 2025 ──
+const BOCA_RATE_2025={
+  pe:{fm:6, fw:8},   // PE Form Meta: 6% · PE Form Web: 8%
+  ap:{fm:4.3}        // Aquí Pago: 4.3%
+};
+
+const DEFAULT={
+  pe:{months:{
+    '2026-01':{fm:{inv:10770587,meta:1228,sheet:776,sas:762,bocas:60,impr:null,reach:929935,freq:null,ctr:null,clics:5515,cpm:null},fw:{inv:9585203,meta:1240,sas:103,bocas:3,impr:null,reach:null,freq:null,ctr:null,clics:null,cpm:null},obj:105},
+    '2026-02':{fm:{inv:6707157,meta:619,sheet:424,sas:403,bocas:15,impr:1139276,reach:386053,freq:2.95,ctr:null,clics:18200,cpm:5887},fw:{inv:2804001,meta:513,sas:61,bocas:0,impr:null,reach:null,freq:null,ctr:null,clics:null,cpm:null},obj:85},
+    '2026-03':{fm:{inv:10374271,meta:941,sheet:695,sas:522,bocas:5,impr:1511970,reach:463735,freq:3.26,ctr:.99,clics:null,cpm:6861},fw:{inv:2038244,meta:195,sas:66,bocas:0,impr:null,reach:null,freq:null,ctr:null,clics:null,cpm:null},obj:128}
+  }},
+  ap:{months:{
+    '2026-01':{fm:{inv:13269168,meta:1091,sheet:822,sas:753,bocas:47,impr:1364728,reach:370721,freq:3.68,ctr:.95,clics:10172,cpm:9723},obj:52.5},
+    '2026-02':{fm:{inv:7885061,meta:806,sheet:584,sas:461,bocas:12,impr:1016170,reach:220918,freq:4.60,ctr:.98,clics:5503,cpm:7760},obj:59.5},
+    '2026-03':{fm:{inv:15670250,meta:1276,sheet:1041,sas:755,bocas:null,impr:1798604,reach:361871,freq:4.97,ctr:.99,clics:null,cpm:8712},obj:74.9}
+  }}
+};
+
+let S={prod:'pe',sec:'dashboard',planMode:'inv',planSubPE:'fm',histTab:'funnel',editMonth:null};
+let D=loadD();
+let charts={};
+
+function loadD(){try{const s=localStorage.getItem(SK);return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT))}catch(e){return JSON.parse(JSON.stringify(DEFAULT))}}
+function saveD(){localStorage.setItem(SK,JSON.stringify(D))}
+function fmt(n){if(n==null||n===''||isNaN(n))return'—';return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function fmtG(n){if(!n||isNaN(n))return'—';return'₲'+fmt(n)}
+function fmtN(n,d=1){if(n==null||isNaN(n))return'—';return(+n).toFixed(d)}
+function avg(arr){const v=arr.filter(x=>x!=null&&!isNaN(x)&&x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+function sortedMonths(p){return Object.keys(D[p].months).sort()}
+function lastN(p,n=2){return sortedMonths(p).slice(-n)}
+function fmtMonth(k){const[y,m]=k.split('-');return MES[parseInt(m)-1]+' '+y.slice(2)}
+function mnum(k){return parseInt(k.split('-')[1])}
+
+function getBaseCPL(p){
+  const normals=[];
+  sortedMonths(p).forEach(mk=>{const d=D[p].months[mk].fm;if(d&&d.inv&&d.meta)normals.push((d.inv/d.meta)/SEAS[mnum(mk)])});
+  return avg(normals)||12000;
+}
+function getCPLRange(p,mn){const base=getBaseCPL(p),s=SEAS[mn];return{low:Math.round(base*s*.82),mid:Math.round(base*s),high:Math.round(base*s*1.22)}}
+function classify(actual,range){return actual<=range.low*1.05?'ok':actual<=range.mid*1.05?'mid':'bad'}
+
+function setProd(p){S.prod=p;document.getElementById('btn-pe').classList.toggle('on',p==='pe');document.getElementById('btn-ap').classList.toggle('on',p==='ap');render()}
+function goSec(s){S.sec=s;document.querySelectorAll('.sec-tab').forEach((t,i)=>t.classList.toggle('on',['dashboard','historial','planeador','tendencias','estacionalidad'][i]===s));document.querySelectorAll('.sec').forEach(el=>el.classList.toggle('on',el.id==='sec-'+s));render()}
+function render(){const s=S.sec,p=S.prod;if(s==='dashboard')rDash(p);else if(s==='historial')rHist(p);else if(s==='planeador')rPlan(p);else if(s==='tendencias')rTend(p);else if(s==='estacionalidad')rSeas(p)}
+
+// ====== DASHBOARD ======
+function rDash(p){
+  const months=sortedMonths(p);
+  if(!months.length){document.getElementById('dash-content').innerHTML='<div class="card">Sin datos.</div>';return}
+  const last=months[months.length-1];
+  const m=D[p].months[last],color=PC[p],hasFW=p==='pe',fm=m.fm;
+  const totInv=(fm.inv||0)+(hasFW&&m.fw?m.fw.inv||0:0);
+  const totMeta=(fm.meta||0)+(hasFW&&m.fw?m.fw.meta||0:0);
+  const totSas=(fm.sas||0)+(hasFW&&m.fw?m.fw.sas||0:0);
+  const totBocas=(fm.bocas||0)+(hasFW&&m.fw?m.fw.bocas||0:0);
+  const objBocas=m.obj||0;
+  const cumpl=objBocas?((totBocas/objBocas)*100).toFixed(1):null;
+  const progColor=cumpl?(parseFloat(cumpl)>=80?'#52a534':parseFloat(cumpl)>=40?'#e89520':'#c93535'):'#ddd';
+  const mn=mnum(last),range=getCPLRange(p,mn);
+  const cplAct=fm.inv&&fm.meta?Math.round(fm.inv/fm.meta):null;
+  const cc=cplAct?classify(cplAct,range):null;
+  const cbadge=cc==='ok'?'b-ok':cc==='mid'?'b-warn':'b-bad';
+  const cmsg=cc==='ok'?'CPL bajo — buen mes':cc==='mid'?'CPL en rango normal':'CPL alto para este mes';
+
+  let h=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+  <div>
+    <div class="card-title" style="margin-bottom:.6rem">Último mes · ${fmtMonth(last)}</div>
+    <div class="mg4">
+      <div class="mc"><div class="mc-l">Inversión total</div><div class="mc-v">${fmtG(totInv)}</div></div>
+      <div class="mc"><div class="mc-l">Meta leads</div><div class="mc-v">${fmt(totMeta)}</div><div class="mc-s">CPL ${fmtG(Math.round(totInv/totMeta))}</div></div>
+      <div class="mc"><div class="mc-l">SAS leads</div><div class="mc-v">${fmt(totSas)}</div><div class="mc-s">CPL ${fmtG(Math.round(totInv/totSas))}</div></div>
+      <div class="mc"><div class="mc-l">Bocas</div><div class="mc-v">${totBocas||'—'}</div><div class="mc-s">${totBocas?'CPB '+fmtG(Math.round(totInv/totBocas)):''}</div></div>
+    </div>`;
+
+  if(fm.impr||fm.reach||fm.cpm||fm.ctr||fm.clics||fm.freq){
+    h+=`<div class="card-title" style="margin:.5rem 0 .4rem">Métricas de plataforma · Form Meta</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.75rem">
+      ${fm.impr?`<div class="mc"><div class="mc-l">Impresiones</div><div class="mc-v" style="font-size:15px">${fmt(fm.impr)}</div></div>`:''}
+      ${fm.reach?`<div class="mc"><div class="mc-l">Alcance</div><div class="mc-v" style="font-size:15px">${fmt(fm.reach)}</div></div>`:''}
+      ${fm.freq?`<div class="mc"><div class="mc-l">Frecuencia</div><div class="mc-v" style="font-size:15px">${fmtN(fm.freq)}</div></div>`:''}
+      ${fm.cpm?`<div class="mc"><div class="mc-l">CPM (₲)</div><div class="mc-v" style="font-size:15px">${fmt(fm.cpm)}</div></div>`:''}
+      ${fm.ctr?`<div class="mc"><div class="mc-l">CTR</div><div class="mc-v" style="font-size:15px">${fmtN(fm.ctr)}%</div></div>`:''}
+      ${fm.clics?`<div class="mc"><div class="mc-l">Clics enlace</div><div class="mc-v" style="font-size:15px">${fmt(fm.clics)}</div>${fm.clics&&fm.inv?`<div class="mc-s">CPC ${fmtG(Math.round(fm.inv/fm.clics))}</div>`:''}
+      </div>`:''}
+      ${fm.clics&&fm.meta?`<div class="mc"><div class="mc-l">Lead rate</div><div class="mc-v" style="font-size:15px">${fmtN(fm.meta/fm.clics*100)}%</div><div class="mc-s">leads / clics</div></div>`:''}
+    </div>`;
+  }
+
+  h+=`<div class="card" style="margin:0;padding:1rem">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
+      <span class="card-title" style="margin:0">Objetivo bocas</span>
+      <span style="font-size:18px;font-weight:700">${fmt(totBocas)} <span style="font-size:12px;color:#aaa">/ ${fmt(objBocas)}</span></span>
+    </div>
+    <div class="prog"><div class="prog-fill" style="width:${Math.min(parseFloat(cumpl)||0,100)}%;background:${progColor}"></div></div>
+    <div style="font-size:11px;color:#aaa;margin-top:4px">${cumpl?cumpl+'% de cumplimiento':'sin datos'} ${totBocas&&totBocas<8?'<span class="tip">posible lag</span>':''}</div>
+  </div></div>
+
+  <div>
+    <div class="card" style="margin-bottom:.8rem;padding:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+        <div class="card-title" style="margin:0">Salud del CPL · ${MES[mn-1]} · Índice ${SEAS[mn]}x</div>
+        ${cplAct?`<span class="badge ${cbadge}">${cmsg}</span>`:''}
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-end;margin-bottom:.75rem">
+        <div><div style="font-size:10px;color:#aaa;margin-bottom:2px">CPL real</div><div style="font-size:22px;font-weight:700">${fmtG(cplAct)}</div></div>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#aaa;margin-bottom:3px">
+            <span style="color:#52a534">Bajo ₲${fmt(range.low)}</span><span style="color:#e89520">Medio ₲${fmt(range.mid)}</span><span style="color:#c93535">Alto ₲${fmt(range.high)}</span>
+          </div>
+          <div class="range-bar"><div class="r-low"></div><div class="r-mid"></div><div class="r-high"></div></div>
+          ${cplAct?`<div style="position:relative;height:8px"><div class="needle-dot" style="left:${Math.min(Math.max((cplAct-range.low*.6)/((range.high*1.1)-(range.low*.6))*100,2),98)}%"></div></div>`:''}
+        </div>
+      </div>
+      <div style="font-size:10px;color:#aaa">${SEAS_LBL[mn]} · los rangos se ajustan automáticamente con estacionalidad histórica de Meta.</div>
+    </div>
+    <div class="card" style="margin:0;padding:1rem">
+      <div class="card-title" style="margin-bottom:.75rem">Funnel · Formulario Meta</div>
+      ${funnelHTML(fm,fm.inv,color)}
+      ${hasFW&&m.fw&&m.fw.inv?`<div class="divider"></div><div class="card-title" style="margin:0 0 .75rem">Funnel · Formulario Web</div>${funnelWebHTML(m.fw,m.fw.inv,color)}`:''}
+    </div>
+  </div></div>`;
+
+  const recent=months.slice(-3);
+  h+=`<div class="card"><div class="card-title" style="margin-bottom:.75rem">Comparativo últimos meses</div>
+  <div style="overflow-x:auto"><table><thead><tr>
+    <th>Mes</th><th>Inversión</th><th>Meta</th><th>Sheet</th><th>SAS</th><th>Bocas</th><th>Sheet%</th><th>SAS%</th><th>Boca%</th>
+    <th>CPL Meta</th><th>CPL SAS</th><th>CPB</th><th>Impr</th><th>Alcance</th><th>CPM</th><th>CTR</th><th>Freq</th><th>Clics</th><th>CPC</th>
+  </tr></thead><tbody>`;
+  recent.forEach(mk=>{
+    const md=D[p].months[mk],fm2=md.fm;
+    const sr=fm2.sheet&&fm2.meta?((fm2.sheet/fm2.meta)*100).toFixed(1):null;
+    const sar=fm2.sas&&fm2.sheet?((fm2.sas/fm2.sheet)*100).toFixed(1):null;
+    const br=fm2.bocas!=null&&fm2.sas?((fm2.bocas/fm2.sas)*100).toFixed(1):null;
+    const r2=getCPLRange(p,mnum(mk));
+    const cpl2=fm2.inv&&fm2.meta?Math.round(fm2.inv/fm2.meta):null;
+    const cc2=cpl2?classify(cpl2,r2):null;
+    const cb2=cc2==='ok'?'b-ok':cc2==='mid'?'b-warn':cc2?'b-bad':'';
+    const cpc2=fm2.clics&&fm2.inv?Math.round(fm2.inv/fm2.clics):null;
+    h+=`<tr><td><b>${fmtMonth(mk)}</b></td>
+      <td class="r">${fmtG(fm2.inv)}</td><td class="r">${fmt(fm2.meta)}</td><td class="r">${fmt(fm2.sheet)}</td><td class="r">${fmt(fm2.sas)}</td>
+      <td class="r">${fm2.bocas!=null?fmt(fm2.bocas):'<span class="incomplete">pend</span>'}</td>
+      <td class="d">${sr?sr+'%':'—'}</td><td class="d">${sar?sar+'%':'—'}</td><td class="d">${br?br+'%':'—'}</td>
+      <td class="r">${cpl2?`<span class="badge ${cb2}">${fmtG(cpl2)}</span>`:'—'}</td>
+      <td class="r">${fm2.sas&&fm2.inv?fmtG(Math.round(fm2.inv/fm2.sas)):'—'}</td>
+      <td class="r">${fm2.bocas&&fm2.inv?fmtG(Math.round(fm2.inv/fm2.bocas)):'—'}</td>
+      <td class="d">${fmt(fm2.impr)}</td><td class="d">${fmt(fm2.reach)}</td>
+      <td class="d">${fm2.cpm?fmtG(fm2.cpm):'—'}</td><td class="d">${fm2.ctr?fm2.ctr+'%':'—'}</td>
+      <td class="d">${fm2.freq?fmtN(fm2.freq):'—'}</td><td class="d">${fmt(fm2.clics)}</td>
+      <td class="d">${cpc2?fmtG(cpc2):'—'}</td>
+    </tr>`;
+  });
+  h+=`</tbody></table></div></div>`;
+  document.getElementById('dash-content').innerHTML=h;
+}
+
+function funnelHTML(d,inv,color){
+  if(!d||!d.meta)return'<div style="color:#aaa;font-size:12px">Sin datos</div>';
+  const max=d.meta||1;
+  const sr=d.sheet&&d.meta?((d.sheet/d.meta)*100).toFixed(1):null;
+  const sar=d.sas&&d.sheet?((d.sas/d.sheet)*100).toFixed(1):null;
+  const bar=(v,c)=>`<div class="fbar-bg"><div class="fbar" style="width:${v?Math.round((v/max)*100):0}%;background:${c}"></div></div>`;
+  return`<div class="funnel">
+    <div class="fstage"><span class="flabel">Meta leads</span>${bar(d.meta,color+'44')}<span class="fcount">${fmt(d.meta)}</span><span class="fcpl">${d.meta&&inv?'CPL '+fmtG(Math.round(inv/d.meta)):'—'}</span></div>
+    ${sr?`<div class="farrow">↓ ${sr}% pasan limpieza RUC</div>`:''}
+    <div class="fstage"><span class="flabel">Sheet leads</span>${bar(d.sheet,color+'88')}<span class="fcount">${fmt(d.sheet)}</span><span class="fcpl">${d.sheet&&inv?'CPL '+fmtG(Math.round(inv/d.sheet)):'—'}</span></div>
+    ${sar?`<div class="farrow">↓ ${sar}% cargados al SAS</div>`:''}
+    <div class="fstage"><span class="flabel">SAS leads</span>${bar(d.sas,color)}<span class="fcount">${fmt(d.sas)}</span><span class="fcpl">${d.sas&&inv?'CPL '+fmtG(Math.round(inv/d.sas)):'—'}</span></div>
+    ${d.bocas!=null?`<div class="farrow">↓ ${d.sas?((d.bocas/d.sas)*100).toFixed(1):'—'}% habilitadas como boca</div>
+    <div class="fstage"><span class="flabel">Bocas</span>${bar(d.bocas,color)}<span class="fcount">${fmt(d.bocas)}</span><span class="fcpl">${d.bocas&&inv?'CPB '+fmtG(Math.round(inv/d.bocas)):'—'}</span></div>`:''}
+  </div>`;
+}
+
+function funnelWebHTML(d,inv,color){
+  if(!d||!d.meta)return'';
+  const max=d.meta||1;
+  const sar=d.sas&&d.meta?((d.sas/d.meta)*100).toFixed(1):null;
+  const bar=(v,c)=>`<div class="fbar-bg"><div class="fbar" style="width:${v?Math.round((v/max)*100):0}%;background:${c}"></div></div>`;
+  return`<div class="funnel">
+    <div class="fstage"><span class="flabel">Meta leads</span>${bar(d.meta,color+'44')}<span class="fcount">${fmt(d.meta)}</span><span class="fcpl">${d.meta&&inv?'CPL '+fmtG(Math.round(inv/d.meta)):'—'}</span></div>
+    ${sar?`<div class="farrow">↓ ${sar}% al SAS (sin limpieza RUC)</div>`:''}
+    <div class="fstage"><span class="flabel">SAS leads</span>${bar(d.sas,color)}<span class="fcount">${fmt(d.sas)}</span><span class="fcpl">${d.sas&&inv?'CPL '+fmtG(Math.round(inv/d.sas)):'—'}</span></div>
+    ${d.bocas!=null?`<div class="farrow">↓ ${d.sas?((d.bocas/d.sas)*100).toFixed(1):'—'}% habilitadas</div>
+    <div class="fstage"><span class="flabel">Bocas</span>${bar(d.bocas,color)}<span class="fcount">${fmt(d.bocas)}</span><span class="fcpl">${d.bocas&&inv?'CPB '+fmtG(Math.round(inv/d.bocas)):'—'}</span></div>`:''}
+  </div>`;
+}
+
+// ====== HISTORIAL ======
+function rHist(p){
+  const hasFW=p==='pe';
+  document.getElementById('hist-sub-tabs').innerHTML=`
+    <button class="sub-tab ${S.histTab==='funnel'?'on':''}" onclick="S.histTab='funnel';rHist('${p}')">Funnel</button>
+    <button class="sub-tab ${S.histTab==='plataforma'?'on':''}" onclick="S.histTab='plataforma';rHist('${p}')">Plataforma</button>
+    ${hasFW?`<button class="sub-tab ${S.histTab==='web'?'on':''}" onclick="S.histTab='web';rHist('${p}')">Form Web</button>`:''}`;
+  const months=sortedMonths(p);
+  if(!months.length){document.getElementById('hist-content').innerHTML='<div style="color:#aaa;padding:1rem">Sin datos.</div>';return}
+  let h='';
+
+  if(S.histTab==='funnel'){
+    h=`<div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th>Inversión (₲)</th><th>Meta</th><th>Sheet</th><th>SAS</th><th>Bocas</th><th>Obj</th><th>Cumpl%</th><th>Sheet%</th><th>SAS%</th><th>Boca%</th><th>CPL Meta</th><th>CPL SAS</th><th>CPB</th><th></th></tr></thead><tbody>`;
+    months.slice().reverse().forEach(mk=>{
+      const md=D[p].months[mk],d=md.fm;
+      if(!d||!d.inv)return;
+      const sr=d.sheet&&d.meta?((d.sheet/d.meta)*100).toFixed(1):null;
+      const sar=d.sas&&d.sheet?((d.sas/d.sheet)*100).toFixed(1):null;
+      const br=d.bocas!=null&&d.sas?((d.bocas/d.sas)*100).toFixed(1):null;
+      const cumpl=d.bocas!=null&&md.obj?((d.bocas/md.obj)*100).toFixed(1):null;
+      const range=getCPLRange(p,mnum(mk));
+      const cplA=d.inv&&d.meta?Math.round(d.inv/d.meta):null;
+      const cc=cplA?classify(cplA,range):null;
+      const cb=cc==='ok'?'b-ok':cc==='mid'?'b-warn':cc?'b-bad':'';
+      const cb2=cumpl?(parseFloat(cumpl)>=80?'b-ok':parseFloat(cumpl)>=40?'b-warn':'b-bad'):'b-neutral';
+      h+=`<tr><td><b>${fmtMonth(mk)}</b></td><td class="r">${fmt(d.inv)}</td><td class="r">${fmt(d.meta)}</td><td class="r">${fmt(d.sheet)}</td><td class="r">${fmt(d.sas)}</td>
+        <td class="r">${d.bocas!=null?fmt(d.bocas):'<span class="incomplete">pend</span>'}</td>
+        <td class="d">${fmt(md.obj)}</td>
+        <td class="r">${cumpl?`<span class="badge ${cb2}">${cumpl}%</span>`:'—'}</td>
+        <td class="d">${sr?sr+'%':'—'}</td><td class="d">${sar?sar+'%':'—'}</td><td class="d">${br?br+'%':'—'}</td>
+        <td class="r">${cplA?`<span class="badge ${cb}">${fmtG(cplA)}</span>`:'—'}</td>
+        <td class="r">${d.sas&&d.inv?fmtG(Math.round(d.inv/d.sas)):'—'}</td>
+        <td class="r">${d.bocas&&d.inv?fmtG(Math.round(d.inv/d.bocas)):'—'}</td>
+        <td><button class="btn btn-sm" onclick="openModal('${mk}')">Editar</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  } else if(S.histTab==='plataforma'){
+    h=`<div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th>Impresiones</th><th>Alcance</th><th>Frecuencia</th><th>CTR (%)</th><th>Clics enlace</th><th>CPM (₲)</th><th>CPC (₲)</th><th>Lead rate</th><th>Meta leads</th><th>Inversión (₲)</th></tr></thead><tbody>`;
+    months.slice().reverse().forEach(mk=>{
+      const d=D[p].months[mk].fm;
+      if(!d||!d.inv)return;
+      const cpc=d.clics&&d.inv?Math.round(d.inv/d.clics):null;
+      const lr=d.meta&&d.clics?((d.meta/d.clics)*100).toFixed(1):null;
+      h+=`<tr><td><b>${fmtMonth(mk)}</b></td>
+        <td class="r">${fmt(d.impr)}</td><td class="r">${fmt(d.reach)}</td>
+        <td class="r">${d.freq?fmtN(d.freq):'—'}</td><td class="r">${d.ctr?fmtN(d.ctr)+'%':'—'}</td>
+        <td class="r">${fmt(d.clics)}</td><td class="r">${d.cpm?fmtG(d.cpm):'—'}</td>
+        <td class="r">${cpc?fmtG(cpc):'—'}</td><td class="d">${lr?lr+'%':'—'}</td>
+        <td class="r">${fmt(d.meta)}</td><td class="r">${fmtG(d.inv)}</td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  } else {
+    h=`<div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th>Inversión (₲)</th><th>Meta leads</th><th>SAS leads</th><th>Bocas</th><th>SAS%</th><th>CPL Meta</th><th>CPL SAS</th><th>CPB</th><th></th></tr></thead><tbody>`;
+    months.slice().reverse().forEach(mk=>{
+      const md=D[p].months[mk],d=md.fw||{};
+      if(!d||!d.inv)return;
+      const sar=d.sas&&d.meta?((d.sas/d.meta)*100).toFixed(1):null;
+      h+=`<tr><td><b>${fmtMonth(mk)}</b></td><td class="r">${fmt(d.inv)}</td><td class="r">${fmt(d.meta)}</td><td class="r">${fmt(d.sas)}</td>
+        <td class="r">${d.bocas!=null?fmt(d.bocas):'<span class="incomplete">pend</span>'}</td>
+        <td class="d">${sar?sar+'%':'—'}</td>
+        <td class="r">${d.meta&&d.inv?fmtG(Math.round(d.inv/d.meta)):'—'}</td>
+        <td class="r">${d.sas&&d.inv?fmtG(Math.round(d.inv/d.sas)):'—'}</td>
+        <td class="r">${d.bocas&&d.inv?fmtG(Math.round(d.inv/d.bocas)):'—'}</td>
+        <td><button class="btn btn-sm" onclick="openModal('${mk}')">Editar</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  document.getElementById('hist-content').innerHTML=h;
+}
+
+// ====== PLANEADOR ======
+function getAvgRates(p,camp){
+  const months=lastN(p,2),isFW=camp==='fw';
+  const vals={cpl:[],sr:[],sar:[],br:[],cpm:[],ctr:[],freq:[]};
+  months.forEach(mk=>{
+    const md=D[p].months[mk],d=isFW?(md.fw||{}):md.fm;
+    if(!d||!d.inv||!d.meta)return;
+    vals.cpl.push(d.inv/d.meta);
+    if(!isFW&&d.sheet&&d.meta)vals.sr.push(d.sheet/d.meta*100);
+    const sb=isFW?d.meta:d.sheet;
+    if(d.sas&&sb)vals.sar.push(d.sas/sb*100);
+    if(d.bocas!=null&&d.bocas>0&&d.sas)vals.br.push(d.bocas/d.sas*100);
+    if(d.cpm)vals.cpm.push(d.cpm);if(d.ctr)vals.ctr.push(d.ctr);if(d.freq)vals.freq.push(d.freq);
+  });
+  return{cpl:avg(vals.cpl),sr:avg(vals.sr),sar:avg(vals.sar),br:avg(vals.br),cpm:avg(vals.cpm),ctr:avg(vals.ctr),freq:avg(vals.freq)};
+}
+
+// Boca rate fija 2025 (se usa como default, editable por el usuario)
+function getBocaRate2025(p,camp){
+  return BOCA_RATE_2025[p]?.[camp]??BOCA_RATE_2025[p]?.fm??5;
+}
+
+function rPlan(p){
+  const hasFW=p==='pe',color=PC[p];
+  const camp=hasFW?(S.planSubPE||'fm'):'fm',isFW=camp==='fw';
+  const r=getAvgRates(p,camp);
+  const bocaDefault=getBocaRate2025(p,camp);
+  const n2=lastN(p,2).map(fmtMonth).join(' + ');
+  const curMon=new Date().getMonth()+1;
+  const defMon=curMon%12+1;
+
+  document.getElementById('plan-sub-tabs').innerHTML=hasFW?`
+    <button class="sub-tab ${camp==='fm'?'on':''}" onclick="S.planSubPE='fm';rPlan('pe')">Form Meta</button>
+    <button class="sub-tab ${camp==='fw'?'on':''}" onclick="S.planSubPE='fw';rPlan('pe')">Form Web</button>`:'';
+
+  let monthOpts='';
+  for(let i=1;i<=12;i++) monthOpts+=`<option value="${i}" ${i===defMon?'selected':''}>${MES[i-1]}</option>`;
+
+  // Nombre del canal para el label de la boca rate
+  const canalName=isFW?'Form Web':p==='ap'?'Aquí Pago':'Form Meta';
+
+  document.getElementById('plan-content').innerHTML=`
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:1.25rem;align-items:start">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:.75rem">Parámetros</div>
+
+      <div class="card-title" style="margin-bottom:.5rem">Modo</div>
+      <div class="tgl-row" style="margin-bottom:1rem">
+        <button class="tgl ${S.planMode==='inv'?'on':''}" onclick="S.planMode='inv';rPlan('${p}')">Inversión →</button>
+        <button class="tgl ${S.planMode==='boca'?'on':''}" onclick="S.planMode='boca';rPlan('${p}')">← Bocas objetivo</button>
+      </div>
+
+      <div class="fg" style="margin-bottom:.75rem">
+        <label class="flb">Mes a planificar</label>
+        <select id="pl-mon" onchange="calcPlan('${p}','${camp}')">${monthOpts}</select>
+        <div style="font-size:10px;color:#aaa;margin-top:3px">Los CPL de cada escenario se calculan automáticamente por estacionalidad.</div>
+      </div>
+
+      ${S.planMode==='inv'
+        ?`<div class="fg" style="margin-bottom:1rem"><label class="flb">Inversión (₲)</label><input type="number" id="pl-inv" value="10000000" oninput="calcPlan('${p}','${camp}')"></div>`
+        :`<div class="fg" style="margin-bottom:1rem"><label class="flb">Bocas que querés lograr</label><input type="number" id="pl-boca" value="80" oninput="calcPlan('${p}','${camp}')"></div>`}
+
+      <div class="card-title" style="margin-bottom:.6rem">Tasas · <span class="tip">${n2}</span> + 2025</div>
+
+      <div class="info-box">
+        <b>Boca rate:</b> fijada con el anual 2025 · <b>${bocaDefault}%</b> (${canalName}).
+        Las demás tasas son promedio de los últimos 2 meses 2026.
+        Podés editar cualquier valor manualmente.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        ${!isFW?`<div class="rate-box"><div class="rb-l">Sheet rate (%)</div><input class="rb-v" type="number" id="pl-sr" value="${r.sr?r.sr.toFixed(1):70}" step=".1" oninput="calcPlan('${p}','${camp}')"></div>`:''}
+        <div class="rate-box"><div class="rb-l">SAS rate (%)</div><input class="rb-v" type="number" id="pl-sar" value="${r.sar?r.sar.toFixed(1):80}" step=".1" oninput="calcPlan('${p}','${camp}')"></div>
+        <div class="rate-box highlighted">
+          <div class="rb-l">Boca rate (%) <span class="tip-2025">2025</span></div>
+          <input class="rb-v" type="number" id="pl-br" value="${bocaDefault}" step=".1" oninput="calcPlan('${p}','${camp}')">
+        </div>
+        <div class="rate-box"><div class="rb-l">CPM (₲)</div><input class="rb-v" type="number" id="pl-cpm" value="${Math.round(r.cpm)||8000}" oninput="calcPlan('${p}','${camp}')"></div>
+        <div class="rate-box"><div class="rb-l">CTR (%)</div><input class="rb-v" type="number" id="pl-ctr" value="${r.ctr?r.ctr.toFixed(2):1}" step=".01" oninput="calcPlan('${p}','${camp}')"></div>
+        <div class="rate-box"><div class="rb-l">Frecuencia</div><input class="rb-v" type="number" id="pl-freq" value="${r.freq?r.freq.toFixed(1):3}" step=".1" oninput="calcPlan('${p}','${camp}')"></div>
+      </div>
+      ${isFW?'<div class="warn-box" style="margin-top:8px">SAS rate web muy variable (8%→34%). Usá con criterio.</div>':''}
+    </div>
+    <div id="pl-result"></div>
+  </div>`;
+  calcPlan(p,camp);
+}
+
+function calcPlan(p,camp){
+  const isFW=camp==='fw',color=PC[p];
+  const g=id=>parseFloat(document.getElementById('pl-'+id)?.value)||0;
+  const mon=parseInt(document.getElementById('pl-mon')?.value)||new Date().getMonth()+2;
+  const sr=g('sr'),sar=g('sar'),br=g('br'),cpm=g('cpm'),ctr=g('ctr'),freq=g('freq');
+
+  const range=getCPLRange(p,mon);
+  const scenarios=[
+    {label:'Escenario bajo',cpl:range.low,col:'#52a534',bg:'#f0fae8',border:'#52a53440',desc:`CPL bajo · ${SEAS_LBL[mon]}`},
+    {label:'Escenario esperado',cpl:range.mid,col:'#e89520',bg:'#fef9f0',border:'#e8952040',desc:`CPL normal · índice ${SEAS[mon]}x`},
+    {label:'Escenario alto',cpl:range.high,col:'#c93535',bg:'#fdf4f4',border:'#c9353540',desc:`CPL alto · mes ${MES[mon-1]}`}
+  ];
+
+  function project(cpl){
+    let inv,meta,sheet,sas,bocas;
+    if(S.planMode==='inv'){
+      inv=g('inv');meta=inv/cpl;sheet=isFW?null:meta*sr/100;sas=isFW?meta*sar/100:sheet*sar/100;bocas=sas*br/100;
+    } else {
+      bocas=g('boca');sas=bocas/(br/100);sheet=isFW?null:sas/(sar/100);meta=isFW?sas/(sar/100):sheet/(sr/100);inv=meta*cpl;
+    }
+    const impr=cpm>0?Math.round(inv*1000/cpm):0;
+    const reach=freq>0?Math.round(impr/freq):0;
+    const clics=Math.round(impr*ctr/100);
+    const cpc=clics>0?Math.round(inv/clics):0;
+    return{inv,meta,sheet,sas,bocas,impr,reach,clics,cpc};
+  }
+
+  function scenCard(sc){
+    const d=project(sc.cpl);
+    const max=d.meta||1;
+    const bar=(v,c)=>`<div class="fbar-bg" style="margin:2px 0"><div class="fbar" style="width:${v?Math.round((v/max)*100):0}%;background:${c}"></div></div>`;
+    const row=(lbl,val,cplVal,barC)=>`
+      <div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;color:#666">${lbl}</span>
+          <div style="text-align:right">
+            <span style="font-size:14px;font-weight:700">${fmt(Math.round(val))}</span>
+            <span style="font-size:10px;color:#aaa;margin-left:4px">${cplVal?'CPL '+fmtG(Math.round(cplVal)):''}</span>
+          </div>
+        </div>
+        ${bar(val,barC)}
+      </div>`;
+
+    let h=`<div class="card" style="border:1.5px solid ${sc.border};background:${sc.bg};padding:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:${sc.col}">${sc.label}</div>
+          <div style="font-size:10px;color:#aaa;margin-top:1px">${sc.desc}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:#aaa">CPL Meta</div>
+          <div style="font-size:18px;font-weight:700;color:${sc.col}">${fmtG(sc.cpl)}</div>
+        </div>
+      </div>`;
+
+    h+=row('Meta leads',d.meta,sc.cpl,sc.col+'44');
+    if(!isFW){
+      h+=`<div style="font-size:10px;color:#ccc;padding-left:4px;margin-bottom:4px">↓ ${sr.toFixed(1)}% → Sheet</div>`;
+      h+=row('Sheet leads',d.sheet,d.sheet?d.inv/d.sheet:0,sc.col+'88');
+    }
+    h+=`<div style="font-size:10px;color:#ccc;padding-left:4px;margin-bottom:4px">↓ ${sar.toFixed(1)}% → SAS</div>`;
+    h+=row('SAS leads',d.sas,d.sas?d.inv/d.sas:0,sc.col+'cc');
+    h+=`<div style="font-size:10px;color:#ccc;padding-left:4px;margin-bottom:4px">↓ ${br.toFixed(1)}% → Bocas <span style="font-size:9px;background:#ede9fe;color:#4c1d95;border-radius:3px;padding:0 4px;font-weight:700">tasa 2025</span></div>`;
+    h+=`<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-size:11px;color:#666">Bocas</span>
+        <div style="text-align:right">
+          <span style="font-size:16px;font-weight:700;color:${sc.col}">${fmt(Math.round(d.bocas))}</span>
+          <span style="font-size:10px;color:#aaa;margin-left:4px">${d.bocas?'CPB '+fmtG(Math.round(d.inv/d.bocas)):''}</span>
+        </div>
+      </div>
+      ${bar(d.bocas,sc.col)}
+    </div>`;
+
+    h+=`<div style="border-top:1px solid ${sc.border};padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      ${S.planMode==='boca'?`<div><div style="font-size:9px;color:#aaa">Inversión necesaria</div><div style="font-size:13px;font-weight:700;color:${sc.col}">${fmtG(Math.round(d.inv))}</div></div>`:''}
+      <div><div style="font-size:9px;color:#aaa">Impresiones</div><div style="font-size:12px;font-weight:600">${fmt(d.impr)}</div></div>
+      <div><div style="font-size:9px;color:#aaa">Alcance</div><div style="font-size:12px;font-weight:600">${fmt(d.reach)}</div></div>
+      <div><div style="font-size:9px;color:#aaa">Clics</div><div style="font-size:12px;font-weight:600">${fmt(d.clics)}</div></div>
+      <div><div style="font-size:9px;color:#aaa">CPC</div><div style="font-size:12px;font-weight:600">${fmtG(d.cpc)}</div></div>
+    </div></div>`;
+    return h;
+  }
+
+  const seasInfo=`<div style="font-size:11px;color:#aaa;margin-bottom:1rem;line-height:1.6">
+    <b>${MES[mon-1]}</b> · índice estacional <b>${SEAS[mon]}x</b> · ${SEAS_LBL[mon]}.
+    Los CPL de cada escenario se calculan automáticamente: base histórica × índice × factor (0.82 / 1.0 / 1.22).
+  </div>`;
+
+  document.getElementById('pl-result').innerHTML=`
+    ${seasInfo}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+      ${scenarios.map(scenCard).join('')}
+    </div>`;
+}
+
+// ====== TENDENCIAS ======
+function rTend(p){
+  const color=PC[p],light=PL[p];
+  const months=sortedMonths(p),labels=months.map(fmtMonth);
+  const fmD=months.map(mk=>D[p].months[mk].fm);
+  const cplM=fmD.map(d=>d.inv&&d.meta?Math.round(d.inv/d.meta):null);
+  const cplS=fmD.map(d=>d.inv&&d.sas?Math.round(d.inv/d.sas):null);
+  const cpbD=fmD.map(d=>d.inv&&d.bocas?Math.round(d.inv/d.bocas):null);
+  const bocasR=fmD.map(d=>d.bocas??null);
+  const bocasO=months.map(mk=>D[p].months[mk].obj??null);
+  const invD=fmD.map(d=>d.inv?+(d.inv/1000000).toFixed(2):null);
+  const srD=fmD.map(d=>d.sheet&&d.meta?+(d.sheet/d.meta*100).toFixed(1):null);
+  const sarD=fmD.map(d=>d.sas&&d.sheet?+(d.sas/d.sheet*100).toFixed(1):null);
+  const brD=fmD.map(d=>d.bocas!=null&&d.sas?+(d.bocas/d.sas*100).toFixed(1):null);
+  const cpmD=fmD.map(d=>d.cpm||null);
+  const ctrD=fmD.map(d=>d.ctr||null);
+  const freqD=fmD.map(d=>d.freq||null);
+  const imprD=fmD.map(d=>d.impr?Math.round(d.impr/1000):null);
+  const reachD=fmD.map(d=>d.reach?Math.round(d.reach/1000):null);
+  const clicsD=fmD.map(d=>d.clics||null);
+  const cpcD=fmD.map(d=>d.clics&&d.inv?Math.round(d.inv/d.clics):null);
+  const baseCPL=getBaseCPL(p);
+  const expCPL=months.map(mk=>Math.round(baseCPL*SEAS[mnum(mk)]));
+
+  document.getElementById('tend-content').innerHTML=`
+  <div class="cgrid2">
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">CPL Meta · CPL SAS · CPL esperado (₲)</div><div class="chart-wrap"><canvas id="ch-cpl"></canvas></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">CPB — costo por boca (₲)</div><div class="chart-wrap"><canvas id="ch-cpb"></canvas></div></div>
+  </div>
+  <div class="cgrid3">
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">Tasas de conversión (%)</div><div class="chart-wrap"><canvas id="ch-rates"></canvas></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">CPM (₲)</div><div class="chart-wrap"><canvas id="ch-cpm"></canvas></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">CTR (%) · Frecuencia</div><div class="chart-wrap"><canvas id="ch-ctr"></canvas></div></div>
+  </div>
+  <div class="cgrid2">
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">Bocas: objetivo vs real</div><div class="chart-wrap"><canvas id="ch-bocas"></canvas></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">Impresiones (k) · Alcance (k)</div><div class="chart-wrap"><canvas id="ch-impr"></canvas></div></div>
+  </div>
+  <div class="cgrid2">
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">Clics al enlace · CPC (₲)</div><div class="chart-wrap"><canvas id="ch-clics"></canvas></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:.75rem">Inversión mensual (M₲)</div><div class="chart-wrap"><canvas id="ch-inv"></canvas></div></div>
+  </div>`;
+
+  const mo={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:9,padding:8}}}};
+  const sc={y:{ticks:{font:{size:10}}}};
+  const sc2={y:{type:'linear',position:'left',ticks:{font:{size:10}}},y2:{type:'linear',position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10}}}};
+  const mkC=(id,cfg)=>{if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg)};
+
+  mkC('ch-cpl',{type:'line',data:{labels,datasets:[
+    {label:'CPL Meta',data:cplM,borderColor:color,backgroundColor:light,fill:false,tension:.3,pointRadius:5,borderWidth:2},
+    {label:'CPL SAS',data:cplS,borderColor:color+'99',backgroundColor:'transparent',tension:.3,pointRadius:4,borderWidth:2,borderDash:[5,3]},
+    {label:'CPL esperado',data:expCPL,borderColor:'#bbb',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[3,3]}
+  ]},options:{...mo,scales:sc}});
+  mkC('ch-cpb',{type:'line',data:{labels,datasets:[{label:'CPB',data:cpbD,borderColor:'#c93535',backgroundColor:'#fde8e820',fill:true,tension:.3,pointRadius:5,borderWidth:2}]},options:{...mo,scales:sc}});
+  mkC('ch-rates',{type:'line',data:{labels,datasets:[
+    {label:'Sheet%',data:srD,borderColor:'#52a534',backgroundColor:'transparent',tension:.3,pointRadius:4,borderWidth:2},
+    {label:'SAS%',data:sarD,borderColor:'#185FA5',backgroundColor:'transparent',tension:.3,pointRadius:4,borderWidth:2,borderDash:[4,2]},
+    {label:'Boca%',data:brD,borderColor:'#854F0B',backgroundColor:'transparent',tension:.3,pointRadius:4,borderWidth:2,borderDash:[2,2]}
+  ]},options:{...mo,scales:sc}});
+  mkC('ch-cpm',{type:'line',data:{labels,datasets:[{label:'CPM',data:cpmD,borderColor:'#7F77DD',backgroundColor:'#EEEDFE40',fill:true,tension:.3,pointRadius:5,borderWidth:2}]},options:{...mo,scales:sc}});
+  mkC('ch-ctr',{type:'line',data:{labels,datasets:[
+    {label:'CTR (%)',data:ctrD,borderColor:'#1D9E75',backgroundColor:'transparent',tension:.3,pointRadius:5,borderWidth:2,yAxisID:'y'},
+    {label:'Frecuencia',data:freqD,borderColor:'#EF9F27',backgroundColor:'transparent',tension:.3,pointRadius:5,borderWidth:2,yAxisID:'y2',borderDash:[4,2]}
+  ]},options:{...mo,scales:sc2}});
+  mkC('ch-bocas',{type:'bar',data:{labels,datasets:[
+    {label:'Objetivo',data:bocasO,backgroundColor:'#e4e2da',borderRadius:4},
+    {label:'Real',data:bocasR,backgroundColor:color,borderRadius:4}
+  ]},options:{...mo,scales:sc}});
+  mkC('ch-impr',{type:'bar',data:{labels,datasets:[
+    {label:'Impr (k)',data:imprD,backgroundColor:color+'55',borderRadius:4},
+    {label:'Alcance (k)',data:reachD,backgroundColor:color+'bb',borderRadius:4}
+  ]},options:{...mo,scales:sc}});
+  mkC('ch-clics',{type:'line',data:{labels,datasets:[
+    {label:'Clics',data:clicsD,borderColor:'#378ADD',backgroundColor:'#e6f1fb40',fill:true,tension:.3,pointRadius:5,borderWidth:2,yAxisID:'y'},
+    {label:'CPC (₲)',data:cpcD,borderColor:'#E24B4A',backgroundColor:'transparent',tension:.3,pointRadius:5,borderWidth:2,yAxisID:'y2',borderDash:[4,2]}
+  ]},options:{...mo,scales:sc2}});
+  mkC('ch-inv',{type:'bar',data:{labels,datasets:[{label:'Inversión (M₲)',data:invD,backgroundColor:color+'bb',borderRadius:4}]},options:{...mo,scales:sc}});
+}
+
+// ====== ESTACIONALIDAD ======
+function rSeas(p){
+  const months=sortedMonths(p);
+  const baseCPL=getBaseCPL(p);
+  const curMon=new Date().getMonth()+1;
+
+  let seasH='<div class="seas-grid">';
+  for(let m=1;m<=12;m++){
+    const pct=Math.round((SEAS[m]/1.55)*100);
+    seasH+=`<div class="seas-month${m===curMon?' current':''}">
+      <div class="seas-mn">${MES[m-1]}</div>
+      <div class="seas-idx" style="color:${SEAS_CLR[m]}">${SEAS[m].toFixed(2)}x</div>
+      <div class="seas-bar"><div class="seas-bar-fill" style="width:${pct}%;background:${SEAS_CLR[m]}"></div></div>
+      <div class="seas-lbl">${SEAS_LBL[m]}</div>
+    </div>`;
+  }
+  seasH+='</div>';
+
+  let effH=`<div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th>CPL real</th><th>CPL esperado</th><th>Rango bajo</th><th>Rango alto</th><th>Índice</th><th>Eficiencia</th><th>Lectura</th></tr></thead><tbody>`;
+  months.forEach(mk=>{
+    const d=D[p].months[mk].fm;
+    if(!d||!d.inv||!d.meta)return;
+    const mn=mnum(mk),cplReal=Math.round(d.inv/d.meta),range=getCPLRange(p,mn);
+    const eff=Math.round((range.mid/cplReal)*100);
+    const eb=eff>=105?'b-ok':eff>=90?'b-warn':'b-bad';
+    const em=eff>=105?'Excelente':eff>=95?'Bueno':eff>=80?'Normal':'Por encima del esperado';
+    effH+=`<tr><td><b>${fmtMonth(mk)}</b></td>
+      <td class="r">${fmtG(cplReal)}</td><td class="r">${fmtG(range.mid)}</td>
+      <td class="r" style="color:#52a534">${fmtG(range.low)}</td>
+      <td class="r" style="color:#c93535">${fmtG(range.high)}</td>
+      <td class="d">${SEAS[mn].toFixed(2)}x · ${SEAS_LBL[mn]}</td>
+      <td class="r"><span class="badge ${eb}">${eff}%</span></td>
+      <td style="font-size:11px;color:#666">${em}</td></tr>`;
+  });
+  effH+=`</tbody></table></div>`;
+
+  let fcastH='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
+  for(let i=0;i<4;i++){
+    const nm=(curMon+i-1)%12+1;
+    const range=getCPLRange(p,nm);
+    fcastH+=`<div class="mc">
+      <div class="mc-l">${MES[nm-1]} · ${SEAS_LBL[nm]}</div>
+      <div style="margin-top:6px;font-size:11px">
+        <span style="color:#52a534;font-weight:700">${fmtG(range.low)}</span>
+        <span style="color:#aaa;font-size:9px;margin:0 3px">·</span>
+        <span style="color:#e89520;font-weight:700">${fmtG(range.mid)}</span>
+        <span style="color:#aaa;font-size:9px;margin:0 3px">·</span>
+        <span style="color:#c93535;font-weight:700">${fmtG(range.high)}</span>
+      </div>
+      <div style="font-size:9px;color:#aaa;margin-top:2px">bajo · esperado · alto</div>
+    </div>`;
+  }
+  fcastH+='</div>';
+
+  document.getElementById('seas-content').innerHTML=`
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">Presión de costos Meta por mes · Estacionalidad</div>
+        <div style="font-size:11px;color:#aaa;margin-top:3px">Índice 1.0 = mes promedio. El mes actual está enmarcado en azul.</div>
+      </div>
+    </div>
+    ${seasH}
+    <div style="font-size:11px;color:#aaa;line-height:1.7">
+      <b>¿Cómo leer esto?</b> Enero tiene índice 0.75: los CPLs son ~25% más baratos que un mes promedio. Noviembre y Diciembre llegan a 1.45–1.55x por Black Friday y Navidad. Los rangos en el Resumen y el Planeador incorporan este ajuste automáticamente — un CPL de ₲${fmt(Math.round(baseCPL*.75))} en Enero equivale a ₲${fmt(Math.round(baseCPL))} en un mes promedio.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:.5rem">Eficiencia histórica vs esperado · ${p==='pe'?'Pago Express':'Aquí Pago'}</div>
+    <div style="font-size:11px;color:#aaa;margin-bottom:.75rem">Eficiencia = CPL esperado ÷ CPL real × 100. Más de 100% = pagás menos de lo esperado para ese mes. Base CPL normalizada: <b>${fmtG(Math.round(baseCPL))}</b></div>
+    ${effH}
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:.75rem">Proyección CPL esperado · Próximos meses</div>
+    ${fcastH}
+  </div>`;
+}
+
+// ====== MODAL ======
+function openModal(monthKey){
+  S.editMonth=monthKey||null;
+  document.getElementById('modal-title').textContent=monthKey?'Editar · '+fmtMonth(monthKey):'Agregar mes';
+  const p=S.prod,hasFW=p==='pe';
+  let ex={fm:{inv:'',meta:'',sheet:'',sas:'',bocas:'',impr:'',reach:'',freq:'',ctr:'',clics:'',cpm:''},fw:{inv:'',meta:'',sas:'',bocas:'',impr:'',reach:'',freq:'',ctr:'',clics:'',cpm:''},obj:''};
+  if(monthKey&&D[p].months[monthKey]){const m=D[p].months[monthKey];ex={fm:{...ex.fm,...m.fm},fw:m.fw?{...ex.fw,...m.fw}:ex.fw,obj:m.obj||''};}
+  const v=(o,k)=>o[k]!=null&&o[k]!==''?o[k]:'';
+  document.getElementById('modal-body').innerHTML=`
+  <div class="fg" style="margin-bottom:1rem"><label class="flb">Mes</label><input type="month" id="m-month" value="${monthKey||''}"></div>
+  <div class="msec">Formulario Meta · Funnel</div>
+  <div class="fg3" style="margin-bottom:.75rem">
+    <div class="fg"><label class="flb">Inversión (₲)</label><input type="number" id="m-fm-inv" value="${v(ex.fm,'inv')}"></div>
+    <div class="fg"><label class="flb">Meta leads</label><input type="number" id="m-fm-meta" value="${v(ex.fm,'meta')}"></div>
+    <div class="fg"><label class="flb">Sheet leads</label><input type="number" id="m-fm-sheet" value="${v(ex.fm,'sheet')}"></div>
+    <div class="fg"><label class="flb">SAS leads</label><input type="number" id="m-fm-sas" value="${v(ex.fm,'sas')}"></div>
+    <div class="fg"><label class="flb">Bocas habilitadas</label><input type="number" id="m-fm-bocas" value="${v(ex.fm,'bocas')}"></div>
+    <div class="fg"><label class="flb">Objetivo bocas</label><input type="number" id="m-obj" value="${ex.obj||''}"></div>
+  </div>
+  <div class="msec">Formulario Meta · Métricas de plataforma</div>
+  <div class="fg3">
+    <div class="fg"><label class="flb">Impresiones</label><input type="number" id="m-fm-impr" value="${v(ex.fm,'impr')}"></div>
+    <div class="fg"><label class="flb">Alcance</label><input type="number" id="m-fm-reach" value="${v(ex.fm,'reach')}"></div>
+    <div class="fg"><label class="flb">Frecuencia</label><input type="number" id="m-fm-freq" value="${v(ex.fm,'freq')}" step=".01"></div>
+    <div class="fg"><label class="flb">CTR (%)</label><input type="number" id="m-fm-ctr" value="${v(ex.fm,'ctr')}" step=".01"></div>
+    <div class="fg"><label class="flb">Clics al enlace</label><input type="number" id="m-fm-clics" value="${v(ex.fm,'clics')}"></div>
+    <div class="fg"><label class="flb">CPM (₲)</label><input type="number" id="m-fm-cpm" value="${v(ex.fm,'cpm')}"></div>
+  </div>
+  ${hasFW?`
+  <div class="msec">Formulario Web · Funnel</div>
+  <div class="fg3" style="margin-bottom:.75rem">
+    <div class="fg"><label class="flb">Inversión (₲)</label><input type="number" id="m-fw-inv" value="${v(ex.fw,'inv')}"></div>
+    <div class="fg"><label class="flb">Meta leads</label><input type="number" id="m-fw-meta" value="${v(ex.fw,'meta')}"></div>
+    <div class="fg"><label class="flb">SAS leads</label><input type="number" id="m-fw-sas" value="${v(ex.fw,'sas')}"></div>
+    <div class="fg"><label class="flb">Bocas habilitadas</label><input type="number" id="m-fw-bocas" value="${v(ex.fw,'bocas')}"></div>
+  </div>
+  <div class="msec">Formulario Web · Métricas de plataforma</div>
+  <div class="fg3">
+    <div class="fg"><label class="flb">Impresiones</label><input type="number" id="m-fw-impr" value="${v(ex.fw,'impr')}"></div>
+    <div class="fg"><label class="flb">Alcance</label><input type="number" id="m-fw-reach" value="${v(ex.fw,'reach')}"></div>
+    <div class="fg"><label class="flb">Frecuencia</label><input type="number" id="m-fw-freq" value="${v(ex.fw,'freq')}" step=".01"></div>
+    <div class="fg"><label class="flb">CTR (%)</label><input type="number" id="m-fw-ctr" value="${v(ex.fw,'ctr')}" step=".01"></div>
+    <div class="fg"><label class="flb">Clics al enlace</label><input type="number" id="m-fw-clics" value="${v(ex.fw,'clics')}"></div>
+    <div class="fg"><label class="flb">CPM (₲)</label><input type="number" id="m-fw-cpm" value="${v(ex.fw,'cpm')}"></div>
+  </div>`:''}`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
+
+function saveMonth(){
+  const p=S.prod,hasFW=p==='pe';
+  const gv=id=>{const v=document.getElementById(id)?.value;return v!==''&&v!=null?parseFloat(v)||null:null};
+  const mk=document.getElementById('m-month').value;
+  if(!mk){alert('Seleccioná el mes');return}
+  const month={
+    fm:{inv:gv('m-fm-inv'),meta:gv('m-fm-meta'),sheet:gv('m-fm-sheet'),sas:gv('m-fm-sas'),bocas:gv('m-fm-bocas'),
+        impr:gv('m-fm-impr'),reach:gv('m-fm-reach'),freq:gv('m-fm-freq'),ctr:gv('m-fm-ctr'),clics:gv('m-fm-clics'),cpm:gv('m-fm-cpm')},
+    obj:gv('m-obj')
+  };
+  if(hasFW){month.fw={inv:gv('m-fw-inv'),meta:gv('m-fw-meta'),sas:gv('m-fw-sas'),bocas:gv('m-fw-bocas'),impr:gv('m-fw-impr'),reach:gv('m-fw-reach'),freq:gv('m-fw-freq'),ctr:gv('m-fw-ctr'),clics:gv('m-fw-clics'),cpm:gv('m-fw-cpm')};}
+  if(!D[p].months)D[p].months={};
+  D[p].months[mk]=month;
+  saveD();closeModal();render();
+}
+
+render();
+</script>
+</body>
+</html>
